@@ -128,6 +128,12 @@ def askTile():
     return ['O', 'X']
 
 
+def askEnemy():
+    enemy = ''
+    while not (enemy == '1' or enemy == '2'):
+        print('Вы играете против компьютера(1) или человека(2)? ')
+        enemy = input().lower()
+    return enemy
 
 
 def getFirstMove(enemy):
@@ -219,6 +225,9 @@ def printScore(board, playerTile, computerTile):
     print(f'Ваш счет: {score[playerTile]}. Счет компьютера: {score[computerTile]}.')
 
 
+def printScoreHuman(board, playerFirstTile, playerSecondTile):
+    score = calculateScore(board)
+    print(f'Счет первого игрока: {score[playerFirstTile]}. Счет второго игрока: {score[playerSecondTile]}.')
 
 
 def play(plaerTile, computerTile, enemy):
@@ -266,7 +275,49 @@ def play(plaerTile, computerTile, enemy):
                     applyMove(board, computerTile, move[0], move[1])
                 turn = 'Человек'
 
-
+        elif enemy == '2':
+            playerFirstValidMoves = findValidMoves(board, playerFirstTile)
+            playerSecondValidMoves = findValidMoves(board, playerSecondTile)
+            if playerFirstValidMoves == [] and playerSecondValidMoves == []:
+                return board
+            elif turn == 'Первый игрок':
+                print('Ходит первый игрок')
+                if playerFirstValidMoves != []:
+                    if showHints:
+                        validMovesBoard = createBoardWithValidMoves(board, playerFirstTile)
+                        drawBoard(validMovesBoard)
+                    else:
+                        drawBoard(board)
+                    printScoreHuman(board, playerFirstTile, playerSecondTile)
+                    move = takePlayerMove(board, playerFirstTile)
+                    if move == 'exit':
+                        print('Бдагодарим за игру!')
+                        sys.exit()
+                    elif move == 'help':
+                        showHints = not showHints
+                        continue
+                    else:
+                        applyMove(board, plaerTile, move[0], move[1])
+                turn = 'Второй игрок'
+            elif turn == 'Второй игрок':
+                print('Ходит второй игрок')
+                if playerSecondValidMoves != []:
+                    if showHints:
+                        validMovesBoard = takeBoardWithValidMovesSecond(board, playerSecondTile)
+                        drawBoard(validMovesBoard)
+                    else:
+                        drawBoard(board)
+                    printScoreHuman(board, playerFirstTile, playerSecondTile)
+                    move = takePlayerMove(board, playerSecondTile)
+                    if move == 'exit':
+                        print('Бдагодарим за игру!')
+                        sys.exit()
+                    elif move == 'help':
+                        showHints = not showHints
+                        continue
+                    else:
+                        applyMove(board, playerSecondTile, move[0], move[1])
+                turn = 'Первый игрок'
 
 
 print('Приветствуем в игре "Риверси"!')
@@ -302,4 +353,31 @@ if enemy == '1':
         if not input().lower().startswith('y'):
             break
 
+elif enemy == '2':
+    print('Подсказки для 1-го игрока обозначены маленькой буквой его фишки, а для 2-го - маленькой буквой 2-й фишки.')
+    if random.randint(0, 1) == 0:
+        print('Первый выбирает фишку второй игрок.')
+        playerSecondTile, playerFirstTile = askTile()
+    else:
+        print('Первый выбирает фишку первый игрок.')
+        playerFirstTile, playerSecondTile = askTile()
+    while True:
+        finalBoard = play(playerFirstTile, playerSecondTile, enemy)
 
+        # Отобразить итоговый счет
+        drawBoard(finalBoard)
+        scores = calculateScore(finalBoard)
+        print(f'X набрал {scores["X"]}. О набрал {scores["O"]}.')
+        if scores[playerFirstTile] > scores[playerSecondTile]:
+            print(
+                f'Первый игрок победил второго на {scores[playerFirstTile] - scores[playerSecondTile]} '
+                f'очков! Позравляю!')
+        elif scores[playerFirstTile] < scores[playerSecondTile]:
+            print(f'Второй игрок поьедил первого на {scores[playerSecondTile] - scores[playerFirstTile]} '
+                  f'очков! Позравляю!')
+        else:
+            print('Ничья!')
+
+        print('Хотите сыграть еще? (yes или no)')
+        if not input().lower().startswith('y'):
+            break
