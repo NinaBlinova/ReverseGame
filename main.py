@@ -2,26 +2,61 @@
 import random
 import sys
 
+
 # для получения функции exit(), которая возвращает целое число, указывающее статус выхода.
 
-width = 8
-height = 8
-
 def drawBoard(board):
-    # вывести игровое поле, ничего не возвращать
-    print('   1 2 3 4 5 6 7 8')
-    print('  ┎─┰─┰─┰─┰─┰─┰─┰─┒')
-    for y in range(height):
-        print(f' {(y + 1)}┃', end='')  # выводит метку для оси у левой части поля и содержит аргумент - ключевое слово
+    horizontalLineOne = '   '
+    UpperBorder = '  '
+    horizontalLineTwo = '   '
+    LowerBorder = '  '
+
+    for i in range(size):
+        if i != size - 1:
+            horizontalLineOne += str(i + 1) + ' '
+        else:
+            horizontalLineOne += str(i + 1)
+    print(horizontalLineOne)
+
+    for i in range(size):
+        if i == 0:
+            UpperBorder += '┎─'
+        elif i > 0 and i < size + 1:
+            UpperBorder += '┰─'
+    print(UpperBorder + '┒')
+
+    for y in range(size):
+        if y < 9:
+            print(f' {(y + 1)}┃',
+                  end='')  # выводит метку для оси у левой части поля и содержит аргумент - ключевое слово
         # end='', чтобы вместо новой строки не ыводить ничего
         # (по умолчанию идет перевод на новую строку, а тут это не нужно)
-        for x in range(width):
+        else:
+            print(f'{(y + 1)}┃', end='')
+        for x in range(size):
             if x > 0:
                 print('\'', end='')
             print(board[x][y], end='')
         print(f'┃{(y + 1)}')
-    print('  ┖─┸─┸─┸─┸─┸─┸─┸─┚')
-    print('   1 2 3 4 5 6 7 8')
+
+    for i in range(size):
+        if i == 0:
+            LowerBorder += '┖─'
+        elif i > 0 and i < size + 1:
+            LowerBorder += '┸─'
+    print(LowerBorder + '┚')
+
+    for i in range(size):
+        if i != size - 1:
+            horizontalLineTwo += str(i + 1) + ' '
+        else:
+            horizontalLineTwo += str(i + 1)
+    print(horizontalLineTwo)
+
+
+def isOnBoard(x, y):
+    # Вернуть True, если координаты есть на игровом поле
+    return x >= 0 and x <= size - 1 and y >= 0 and y <= size - 1
 
 
 def isValidMove(board, tile, xstart, ystart):
@@ -63,14 +98,9 @@ def isValidMove(board, tile, xstart, ystart):
 def createBoard():
     # создать структуру данных нового чистого игрового поля
     board = []
-    for i in range(width):
-        board.append([' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '])
+    for i in range(size):
+        board.append([' '] * size)
     return board
-
-
-def isOnBoard(x, y):
-    # Вернуть True, если координаты есть на игровом поле
-    return x >= 0 and x <= width - 1 and y >= 0 and y <= height - 1
 
 
 def createBoardWithValidMoves(board, tile):
@@ -94,8 +124,8 @@ def takeBoardWithValidMovesSecond(board, tile):
 def findValidMoves(board, tile):
     # вернуть список списков с координатими х и у допустимых ходов для данного игрока на данном игровом поле
     movies = []
-    for x in range(width):
-        for y in range(height):
+    for x in range(size):
+        for y in range(size):
             if isValidMove(board, tile, x, y) != False:
                 movies.append([x, y])
     return movies
@@ -105,8 +135,8 @@ def calculateScore(board):
     # определить кол-во очков, подсчитав фишки. Вернуть словарь с лючами 'X' и 'O'
     xscore = 0
     oscore = 0
-    for x in range(width):
-        for y in range(height):
+    for x in range(size):
+        for y in range(size):
             if board[x][y] == 'X':
                 xscore += 1
             if board[x][y] == 'O':
@@ -166,21 +196,23 @@ def cloneBoard(board):
     # сделать копию списка board и вернуть ее
     clone = createBoard()
 
-    for x in range(width):
-        for y in range(height):
+    for x in range(size):
+        for y in range(size):
             clone[x][y] = board[x][y]
     return clone
 
 
 def isCorner(x, y):
     # Вернуть True, если указанная позиция находится в одном из четырех углов
-    return (x == 0 or x == width - 1) and (y == 0 or y == height - 1)
+    return (x == 0 or x == size - 1) and (y == 0 or y == size - 1)
 
 
 def takePlayerMove(board, playerTile):
     # позволить игроку ввести свой ход
     # вернуть ход в виде [x, y] (или вернуть строки "подсказка" или "выход"
-    validDigits = ['1', '2', '3', '4', '5', '6', '7', '8']
+    validDigits = []
+    for i in range(1, size + 1):
+        validDigits.append(str(i))
     while True:
         print('укажите ход, текст для завершения игры - exit или для вывода подсказки - help.')
         move = input().lower()
@@ -237,10 +269,10 @@ def play(plaerTile, computerTile, enemy):
 
     # очистить игровое поле и поставить игровые фиши
     board = createBoard()
-    board[3][3] = 'X'
-    board[3][4] = 'O'
-    board[4][3] = 'O'
-    board[4][4] = 'X'
+    board[int(size / 2) - 1][int(size / 2) - 1] = 'X'
+    board[int(size / 2) - 1][int(size / 2)] = 'O'
+    board[int(size / 2)][int(size / 2) - 1] = 'O'
+    board[int(size / 2)][int(size / 2)] = 'X'
     while True:
         if enemy == '1':
             playerValidMoves = findValidMoves(board, playerTile)
@@ -322,12 +354,15 @@ def play(plaerTile, computerTile, enemy):
 
 print('Приветствуем в игре "Риверси"!')
 print('Правила игры:')
-print('В игре используется поле размером 8х8 клеток и фишки - Х и О (это все буквы английского алфавита);')
+print('В игре используется поле размером aхa клеток и фишки - Х и О (это все буквы английского алфавита);')
 print(
     'Когда игрок помещает фишку на поле, все фишки противника, которые находятся между новой фишкой '
     'и остальними фишками игрока, переворачиваются;')
 print('Выигрывает тот игрок, у которого на поле осталось больше всегоо фишек.')
 
+size = int(input('Введите размер поля: '))
+if size % 2 != 0:
+    size = size + 1
 enemy = askEnemy()
 
 if enemy == '1':
