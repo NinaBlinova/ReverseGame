@@ -13,9 +13,9 @@
 
 :white_check_mark: Игра прекращается, когда на доску выставлены все фишки. После подсчёта фишек победителем объявляется игрок, у которого фишек на поле больше. Если количество фишек одинаковое — объявляется ничья.
 
-![image](https://user-images.githubusercontent.com/77924200/236801383-8e0aba89-0e04-42f3-8a74-9a5c2c7a7230.png)
-![image](https://user-images.githubusercontent.com/77924200/236801452-56ed46f0-fca3-4d6d-a07a-566f25ecc807.png)
-![image](https://user-images.githubusercontent.com/77924200/236801507-4108f72b-5a40-4c18-adbd-b2faf0c2bfb5.png)
+![image](https://user-images.githubusercontent.com/77924200/236803510-8c6b0f1d-6b56-4ff1-9160-17fa29f9b392.png)
+![image](https://user-images.githubusercontent.com/77924200/236803549-57e39785-50a4-4908-be3f-684c1be667e3.png)
+![image](https://user-images.githubusercontent.com/77924200/236803591-f96ad7c8-0264-482d-bb03-551f01bad2b1.png)
 
 
 
