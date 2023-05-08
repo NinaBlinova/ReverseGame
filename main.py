@@ -392,7 +392,7 @@ print('Выигрывает тот игрок, у которого на поле
 size = int(input('Введите размер поля: '))
 if size % 2 != 0:
     size = size + 1
-elif size < 3:
+elif size < 3 or size > 10:
     size = 8
 enemy = askEnemy()
 
