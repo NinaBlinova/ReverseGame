@@ -103,6 +103,18 @@ def createBoard():
     return board
 
 
+def findValidMoves(board, tile):
+    # вернуть список списков с координатими х и у допустимых ходов для данного игрока на данном игровом поле
+    movies = []
+    for x in range(size):
+        for y in range(size):
+            if isValidMove(board, tile, x, y) != False:
+                movies.append([x, y])
+    return movies
+
+
+# следующие две функции возвращают структуру данных игрового поля, которая содержит маленькую букву фишки во всех клетках
+# ходы в которые допустимы
 def createBoardWithValidMoves(board, tile):
     # вернуть новое поле с точками, обозначающими допустимые ходы, которые может сделать игрок first
     clone = cloneBoard(board)
@@ -119,16 +131,6 @@ def takeBoardWithValidMovesSecond(board, tile):
     for x, y in findValidMoves(clone, tile):
         clone[x][y] = tile.lower()
     return clone
-
-
-def findValidMoves(board, tile):
-    # вернуть список списков с координатими х и у допустимых ходов для данного игрока на данном игровом поле
-    movies = []
-    for x in range(size):
-        for y in range(size):
-            if isValidMove(board, tile, x, y) != False:
-                movies.append([x, y])
-    return movies
 
 
 def calculateScore(board):
@@ -150,8 +152,7 @@ def askTile():
     tile = ''
 
     while not (tile == 'X' or tile == 'O'):
-        print('Вы играете за Х или О?')
-        tile = input().upper()
+        tile = input('Вы играете за Х или О? ').upper()
     # Первый элемент в списке - фишка игрока, второй элемент - фишка компьюткра
     if tile == 'X':
         return ['X', 'O']
@@ -161,8 +162,7 @@ def askTile():
 def askEnemy():
     enemy = ''
     while not (enemy == '1' or enemy == '2'):
-        print('Вы играете против компьютера(1) или человека(2)? ')
-        enemy = input().lower()
+        enemy = input('Вы играете против компьютера(1) или человека(2)? ').lower()
     return enemy
 
 
@@ -192,6 +192,10 @@ def applyMove(board, tile, xstart, ystart):
     return True
 
 
+# функция создает структуру данных пустого поля, но затем копирует все позиции в параметре board
+# с помощью вложенного цикла
+# ИИ использует данную функцию, чтобы была возможность вносить изменения в копию игрового поля,
+# не изменяя исходное игровое поле
 def cloneBoard(board):
     # сделать копию списка board и вернуть ее
     clone = createBoard()
@@ -202,6 +206,7 @@ def cloneBoard(board):
     return clone
 
 
+# нужна для программирования ИИ
 def isCorner(x, y):
     # Вернуть True, если указанная позиция находится в одном из четырех углов
     return (x == 0 or x == size - 1) and (y == 0 or y == size - 1)
@@ -213,21 +218,38 @@ def takePlayerMove(board, playerTile):
     validDigits = []
     for i in range(1, size + 1):
         validDigits.append(str(i))
+    # Цикл while продолжает выполнение до тех пор, пока игрок не введет допустимый ход.
+    # игры ожидает, что игрок введет координаты х и у в виде двух чисел с пробелом
     while True:
         print('укажите ход, текст для завершения игры - exit или для вывода подсказки - help.')
         move = input().lower()
         if move == 'exit' or move == 'help':
             return move
-        elif len(move) == 2 and move[0] in validDigits and move[1] in validDigits:
+        elif len(move) == 3 and move[0] in validDigits and move[2] in validDigits:
             x = int(move[0]) - 1
-            y = int(move[1]) - 1
+            y = int(move[2]) - 1
             if isValidMove(board, playerTile, x, y) == False:
                 continue
             else:
                 break
+        elif len(move) == 4:
+            if move[0] in validDigits and move[1] == ' ' and (move[2] + move[3]) in validDigits:
+                x = int(move[0]) - 1
+                y = int(move[2] + move[3]) - 1
+                if isValidMove(board, playerTile, x, y) == False:
+                    continue
+                else:
+                    break
+            elif (move[0] + move[1]) in validDigits and move[2] == ' ' and move[3] in validDigits:
+                x = int(move[0] + move[1]) - 1
+                y = int(move[3]) - 1
+                if isValidMove(board, playerTile, x, y) == False:
+                    continue
+                else:
+                    break
         else:
             print('Это недопустимый ход. Введите номер столбца от 1 до 8 и номер ряда от 1 до 8.')
-            print('К примеру, значение 81 перемещает в верхний правый угол.')
+            print('К примеру, значение 8 1 перемещает в верхний правый угол.')
     return [x, y]
 
 
@@ -252,11 +274,13 @@ def calculateComputerMove(board, computerTile):
     return bestMove
 
 
+# выводит результаты игры человека и компьютера
 def printScore(board, playerTile, computerTile):
     score = calculateScore(board)
     print(f'Ваш счет: {score[playerTile]}. Счет компьютера: {score[computerTile]}.')
 
 
+# выводит результаты игры человека №1 и человека №2
 def printScoreHuman(board, playerFirstTile, playerSecondTile):
     score = calculateScore(board)
     print(f'Счет первого игрока: {score[playerFirstTile]}. Счет второго игрока: {score[playerSecondTile]}.')
@@ -280,6 +304,10 @@ def play(plaerTile, computerTile, enemy):
             if playerValidMoves == [] and computerValidMoves == []:
                 return board  # ходов нет ни у кого, так что окончить игру
             elif turn == 'Человек':  # ход человека
+                # Если включен режим подсказок, т.е. showHints принимает значение True,
+                # тогда структура данных должна отобразить подсказки на каждой допустимой для хода игрока клетке.
+                # Это осуществляется с помощью функции createBoardWithValidMoves().
+                # Она возвращает копию поля с подсказками.
                 if playerValidMoves != []:
                     if showHints:
                         validMovesBoard = createBoardWithValidMoves(board, playerTile)
@@ -296,12 +324,13 @@ def play(plaerTile, computerTile, enemy):
                         continue
                     else:
                         applyMove(board, plaerTile, move[0], move[1])
+                # поток выполнения перезапускает блок else и достигает конца блока while, поэтому интерпритатор
+                # возвращается к интсрукции while. На этот раз будет очередб компьютера
                 turn = 'Компьютер'
             elif turn == 'Компьютер':  # ход Компьютерa
                 if computerValidMoves != []:
                     drawBoard(board)
                     printScore(board, plaerTile, computerTile)
-
                     input('нажмите клавишу Enter для просмотра хода компьютера')
                     move = calculateComputerMove(board, computerTile)
                     applyMove(board, computerTile, move[0], move[1])
@@ -354,7 +383,7 @@ def play(plaerTile, computerTile, enemy):
 
 print('Приветствуем в игре "Риверси"!')
 print('Правила игры:')
-print('В игре используется поле размером aхa клеток и фишки - Х и О (это все буквы английского алфавита);')
+print('В игре используется поле размером SIZEхSIZE клеток и фишки - Х и О (это все буквы английского алфавита);')
 print(
     'Когда игрок помещает фишку на поле, все фишки противника, которые находятся между новой фишкой '
     'и остальними фишками игрока, переворачиваются;')
@@ -363,6 +392,8 @@ print('Выигрывает тот игрок, у которого на поле
 size = int(input('Введите размер поля: '))
 if size % 2 != 0:
     size = size + 1
+elif size < 3:
+    size = 8
 enemy = askEnemy()
 
 if enemy == '1':
